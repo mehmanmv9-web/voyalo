@@ -666,7 +666,7 @@ function renderLand(){$('#s-land').innerHTML=`<div class="land"><div class="logo
  <h1>Купили путёвку? Получите свой путеводитель.</h1><p class="l">Введите страну, даты, отель и кто едет — и Voyalo за минуту соберёт красочное приложение для всей семьи: погода на ваши дни, карта, что рядом с отелем, календарь, рейс, фразы, игры для детей.</p>
  <button class="bigbtn" data-up>📎 Загрузить билет и ваучер</button>
  <button class="ghost" data-go="wiz">✍️ Ввести поездку вручную</button>
- <button class="ghost" data-demo>👀 Посмотреть пример — Пхукет</button>
+ <button class="ghost" data-demo>👀 Посмотреть пример — Дубай</button>
  ${TRIPS.length?`<button class="ghost" data-go="cab">📂 Мои поездки (${TRIPS.length})</button>`:''}
  <div class="globe">🌍</div>
  <div class="feat"><div><span>☀️</span>Погода и море на ваши даты</div><div><span>🗺️</span>Кафе, аптеки, пляжи рядом с отелем</div><div><span>✈️</span>Таймер до вылета и план дня</div><div><span>🗣️</span>Фразы на местном языке</div><div><span>🎨</span>Оформление под страну</div><div><span>🧸</span>50 игр для детей без интернета</div></div>
@@ -889,7 +889,7 @@ document.addEventListener('click',e=>{const o=e.target.closest('[data-open]');if
  if(e.target.closest('[data-edit2]')){newWiz(T);return}
  if(e.target.closest('[data-del]')){if(!confirm('Удалить поездку «'+(T.title||T.dest.name)+'»?'))return;TRIPS=TRIPS.filter(t=>t.id!==T.id);CUR=TRIPS[0]?TRIPS[0].id:null;saveTrips();T=curTrip();if(T)openGuide();else{renderLand();show('land')}}});
 /* ---------- пример ---------- */
-function demoTrip(){const y=new Date().getFullYear();return{id:'demo',title:'Пример: 3 семьи на Пхукете',dest:{name:'Пхукет',admin:'Пхукет',country:'Таиланд',cc:'TH',lat:7.89,lng:98.4,tz:'Asia/Bangkok',pop:400000},from:'2026-11-27',to:'2026-12-05',home:{name:'Алматы',country:'Казахстан',cc:'KZ',lat:43.25,lng:76.92,tz:'Asia/Almaty'},hotel:{name:'The Marin Phuket Kamala Beach',addr:'Kamala, Kathu, Phuket',lat:7.9496,lng:98.2836},people:[{n:'Арман',age:'a',e:'👨'},{n:'Айгерим',age:'a',e:'👩'},{n:'Алихан',age:'6',e:'👦'},{n:'Аяна',age:'3',e:'👧'},{n:'Малыш',age:'0',e:'👶'}],out:{no:'VSV 5202',dep:'2026-11-27T00:55',arr:'2026-11-27T10:25'},back:{no:'VSV 5203',dep:'2026-12-05T13:55',arr:'2026-12-05T19:40'},ints:['beach','kids','food','halal']}}
+function demoTrip(){return{id:'demo',title:'Пример: семья в Дубае',dest:{name:'Дубай',admin:'Дубай',country:'ОАЭ',cc:'AE',lat:25.0772,lng:55.3093,tz:'Asia/Dubai',pop:3300000},from:'2026-12-20',to:'2026-12-27',home:{name:'Алматы',country:'Казахстан',cc:'KZ',lat:43.25,lng:76.92,tz:'Asia/Almaty'},hotel:{name:'Atlantis The Palm',addr:'Crescent Road, The Palm Jumeirah, Dubai',lat:25.1304,lng:55.1171},people:[{n:'Папа',age:'a',e:'👨'},{n:'Мама',age:'a',e:'👩'},{n:'Сын',age:'6',e:'👦'},{n:'Дочка',age:'3',e:'👧'}],out:{no:'KC 895',dep:'2026-12-20T07:40',arr:'2026-12-20T10:05'},back:{no:'KC 896',dep:'2026-12-27T11:30',arr:'2026-12-27T17:35'},ints:['beach','kids','food','shop'],cit:'KZ',rel:'none'}}
 
 /* ---------- экстренные номера по странам ---------- */
 const EMG={KZ:[['Единый','112'],['Полиция','102'],['Скорая','103'],['Пожарные','101']],RU:[['Единый','112'],['Полиция','102'],['Скорая','103'],['Пожарные','101']],UZ:[['Полиция','102'],['Скорая','103'],['Пожарные','101']],KG:[['Полиция','102'],['Скорая','103'],['Пожарные','101']],AZ:[['Полиция','102'],['Скорая','103'],['Пожарные','101']],AM:[['Единый','112']],BY:[['Полиция','102'],['Скорая','103'],['Пожарные','101']],
