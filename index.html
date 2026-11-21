@@ -221,7 +221,7 @@ html.eco .amb{display:none}html.eco .amb2 i{animation:none}
 .ph h2{background:linear-gradient(90deg,#2b1a4a,#7a4b00);-webkit-background-clip:text;background-clip:text;color:transparent}
 .bk{background:rgba(255,255,255,.85)!important;border:1px solid rgba(201,162,39,.3)!important}
 .act.pri{background:linear-gradient(135deg,var(--c1),var(--c2))!important}
-@media (min-width:1100px){.app{border:1px solid rgba(245,215,122,.5)}}
+@media (min-width:1100px){.app{border:1px solid rgba(245,215,122,.5)}body{background:transparent!important}}
 </style></head>
 <body><aside class="desk notranslate"><div class="logo"><i>🧭</i>Voyalo</div><h1>Ваш семейный путеводитель — всегда в кармане</h1><p>Voyalo создан для телефона: откройте эту ссылку на смартфоне и добавьте на экран «Домой» — будет как приложение, работает и без интернета. Здесь, на компьютере, удобно всё подготовить заранее.</p><div class="dl"><span>📱 Телефон</span><span>📲 Планшет</span><span>💻 Компьютер</span></div><div class="url"><span id="durl"></span><button id="dcopy">Скопировать</button></div></aside><div class="app" id="app"><div class="amb" aria-hidden="true"></div><div class="amb2" aria-hidden="true"><i></i><i></i><i></i></div>
  <section class="scr" id="s-land"></section>
@@ -802,7 +802,7 @@ async function loadAll(){T=curTrip();const c=tc();const d=T.dest,h=T.hotel||d;co
  J(`https://marine-api.open-meteo.com/v1/marine?latitude=${h.lat}&longitude=${h.lng}&current=wave_height,sea_surface_temperature&daily=wave_height_max&timezone=auto&forecast_days=16`).then(x=>{c.marine=(x.current&&x.current.sea_surface_temperature!=null)?{t:Date.now(),d:x}:null}).catch(()=>c.marine=null),
  J(`https://restcountries.com/v3.1/alpha/${d.cc}?fields=name,currencies,languages,capital,population,car,idd,translations,timezones`).then(x=>c.country=x).catch(()=>{}),
  Promise.all([...new Set([T.from.slice(0,4),T.to.slice(0,4)])].map(y=>J(`https://date.nager.at/api/v3/PublicHolidays/${y}/${d.cc}`).catch(()=>[]))).then(a=>c.hol=a.flat()),
- J(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${d.lat}&lon=${d.lng}&zoom=10&accept-language=en`).then(x=>{const A=x.address||{};c.enName=(A.city||A.town||A.municipality||A.state||d.name).replace(/\s+(Emirate|Province|Region|Governorate|Oblast)$/i,'')}).catch(()=>{}),
+ J(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(d.name)}&count=5&language=en`).then(x=>{const r=(x.results||[]).find(r=>r.country_code===d.cc);if(r)c.enName=r.name;else throw 0}).catch(()=>J(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${d.lat}&lon=${d.lng}&zoom=10&accept-language=en`).then(x=>{const A=x.address||{};c.enName=(A.city||A.town||A.municipality||A.state||d.name).replace(/\s+(Emirate|Province|Region|Governorate|Oblast|District)$/i,'')})).catch(()=>{}),
  J(`https://open.er-api.com/v6/latest/${homeCur()}`).then(x=>c.rates={t:Date.now(),r:x.rates}).catch(()=>{}),
  wikiNear(d.lat,d.lng).then(x=>c.sights=x),
  cityWiki().catch(()=>{}),
