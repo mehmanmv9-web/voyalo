@@ -1222,7 +1222,7 @@ function netBanner(){let b=document.getElementById('netb');if(!b){b=document.cre
 addEventListener('online',()=>{netBanner();if(T)sync&&sync()});addEventListener('offline',netBanner);setTimeout(netBanner,500);
 
 /* ===================== Экономия трафика ===================== */
-function ecoAuto(){const c=navigator.connection||{};return !!(c.saveData||/(^|-)2g|3g/.test(c.effectiveType||''))}
+function ecoAuto(){const c=navigator.connection||{};return !!(c.saveData||/(^|-)2g/.test(c.effectiveType||''))}
 const ECO=()=>{const s=LS.get('eco','auto');return s==='on'||(s==='auto'&&ecoAuto())};
 const onWifi=()=>{const c=navigator.connection;if(!c||!c.type)return !ecoAuto();return c.type==='wifi'||c.type==='ethernet'};
 function img(src,cls){return !src?'':ECO()?`<button class="ecoimg ${cls||''}" data-eimg="${esc(src)}">📷 Показать фото</button>`:`<img class="${cls||''}" src="${esc(src)}" loading="lazy" alt="">`}
