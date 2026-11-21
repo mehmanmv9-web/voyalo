@@ -6,7 +6,6 @@
 <meta name="theme-color" content="#7048e8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Voyalo">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{--c1:#7048e8;--c2:#e64980;--c3:#1c7ed6;--ink:#14213d;--mut:#6b7486;--bg:#f6f3ee;--card:#fff;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;overscroll-behavior:none}
@@ -47,7 +46,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}input,
 .sight{display:flex;gap:12px}.sight img{width:92px;height:92px;object-fit:cover;border-radius:14px;flex:none;background:#eee}
 .days{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.day{background:#fff;border-radius:16px;padding:7px 0 8px;display:flex;flex-direction:column;align-items:center;box-shadow:0 2px 8px rgba(20,33,61,.07);position:relative}.day small{font-size:11px;color:var(--mut);font-weight:800;text-transform:uppercase}.day b{font-size:21px}.day i{font-style:normal;font-size:16px}.day.on{background:linear-gradient(140deg,var(--c1),var(--c2));color:#fff}.day.on small{color:#fff}.day.today{box-shadow:0 0 0 2px var(--c2)}.day em{position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:#e64980}
 .cklist label{display:flex;gap:10px;align-items:flex-start;background:#fff;border-radius:14px;padding:11px 12px;font-size:14px;margin-bottom:6px;font-weight:600}.cklist input{width:22px;height:22px;flex:none;accent-color:var(--c1)}.cklist input:checked+span{text-decoration:line-through;opacity:.5}
-#map{height:calc(100vh - 210px);border-radius:22px;overflow:hidden;margin:0 14px}
+#map{height:calc(100vh - 270px);min-height:300px;border-radius:22px;overflow:hidden;margin:0 14px}
 .full{position:absolute;inset:0;z-index:80;background:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}.full.on{display:flex}.full .big{font-size:40px;font-weight:800;line-height:1.25;word-break:break-word}.full .ru{font-size:18px;color:var(--mut);margin-top:12px}.full .x{position:absolute;top:calc(14px + var(--safe-t));right:14px;width:44px;height:44px;border-radius:50%;background:#f1f3f5;font-size:20px}
 .toast{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);background:#14213d;color:#fff;padding:10px 16px;border-radius:14px;font-weight:700;font-size:14px;z-index:90;opacity:0;transition:.3s;pointer-events:none;max-width:86%;text-align:center}.toast.on{opacity:1}
 /* landing + wizard */
@@ -161,7 +160,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}input,
  <section class="scr" id="s-build"></section>
  <section class="scr" id="s-home"></section>
  <section class="scr" id="s-page"></section>
- <section class="scr" id="s-map"><div class="ph"><h2>🗺️ Карта</h2></div><div class="chiprow pg" id="mapcats"></div><div id="map"></div></section>
+ <section class="scr" id="s-map"><div class="ph"><h2>🗺️ Карта</h2></div><div class="chiprow pg" id="mapcats"></div><div id="map"></div><div class="acts2 pg" id="mapgo" style="margin-top:8px"></div></section>
  <section class="scr" id="s-kids"></section>
  <section class="scr" id="s-cab"></section>
  <nav class="tabs" id="tabs" style="display:none"><button data-tab="home" class="on"><i>🏠</i>Главная</button><button data-tab="map"><i>🗺️</i>Карта</button><button data-tab="days"><i>📅</i>Дни</button><button data-tab="kids"><i>🧸</i>Дети</button><button data-tab="cab"><i>👤</i>Кабинет</button></nav>
@@ -169,7 +168,6 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}input,
  <div class="full" id="full"><button class="x" data-fx>✕</button><div id="fullin"></div></div>
  <div class="toast" id="toast"></div>
 </div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <script>
 /* ---------- Наборы стран ---------- */
 const PACKS={
@@ -773,15 +771,15 @@ function page(title,html,tab){TABOF=tab||'home';$('#s-page').innerHTML=`<div cla
 addEventListener('popstate',()=>{if(SCR==='page'||SCR==='map'||SCR==='kids'||SCR==='cab'){if($('#kstage').classList.contains('on')){kClose();return}openGuide()}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-back]');if(b){history.back();return}
  const v=e.target.closest('[data-v]');if(v){VIEWS[v.dataset.v]&&VIEWS[v.dataset.v]();return}
- const t=e.target.closest('[data-tab]');if(t){const k=t.dataset.tab;if(k==='home')openGuide();else if(k==='map')openMap();else if(k==='days')VIEWS.days();else if(k==='kids')openKids();else{renderCab();show('cab')}}});
+ const t=e.target.closest('[data-tab]');if(t){const k=t.dataset.tab;if(k==='home')openGuide();else if(k==='map')openMap('');else if(k==='days')VIEWS.days();else if(k==='kids')openKids();else{renderCab();show('cab')}}});
 
 /* ---------- кнопки мест ---------- */
 const gm=(lat,lng)=>`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 const gdir=(lat,lng,mode)=>`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=${mode||'driving'}`;
+const gplace=o=>`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((o.local||o.n)?((o.local||o.n)+', '+(T.dest.name||'')):(o.lat+','+o.lng))}`;
 const PL={};let PLN=0;
-function pbtns(o){const k='p'+(PLN++);PL[k]=o;return `<div class="acts"><a class="act pri" href="${gdir(o.lat,o.lng,o.walk?'walking':'driving')}" target="_blank" rel="noopener">🧭 Маршрут</a><button class="act" data-show="${k}">🚕 Таксисту</button><button class="act" data-onmap="${k}">🗺️ На карте</button></div>`}
-document.addEventListener('click',e=>{const s=e.target.closest('[data-show]');if(s){const o=PL[s.dataset.show];showFull(`<div style="font-size:54px">📍</div><div class="big">${esc(o.local||o.n)}</div>${o.local&&o.local!==o.n?`<div class="ru">${esc(o.n)}</div>`:''}${o.addr?`<div class="ru">${esc(o.addr)}</div>`:''}<p class="ru">Покажите водителю или прохожему</p>`);return}
- const m=e.target.closest('[data-onmap]');if(m){const o=PL[m.dataset.onmap];openMap([{...o,e:o.e||'📍'}])}});
+function pbtns(o){const k='p'+(PLN++);PL[k]=o;return `<div class="acts"><a class="act pri" href="${gdir(o.lat,o.lng,o.walk?'walking':'driving')}" target="_blank" rel="noopener">🧭 Маршрут</a><button class="act" data-show="${k}">🚕 Таксисту</button><a class="act" href="${gplace(o)}" target="_blank" rel="noopener">🗺️ Google Карты</a></div>`}
+document.addEventListener('click',e=>{const s=e.target.closest('[data-show]');if(s){const o=PL[s.dataset.show];showFull(`<div style="font-size:54px">📍</div><div class="big">${esc(o.local||o.n)}</div>${o.local&&o.local!==o.n?`<div class="ru">${esc(o.n)}</div>`:''}${o.addr?`<div class="ru">${esc(o.addr)}</div>`:''}<p class="ru">Покажите водителю или прохожему</p>`);return}});
 const dist=(a,b,c,d)=>{const R=6371e3,r=x=>x*Math.PI/180;const x=Math.sin(r(c-a)/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(r(d-b)/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
 const dTxt=m=>m<1000?Math.round(m/10)*10+' м':(m/1000).toFixed(1)+' км';
 const walkT=m=>m<2500?`🚶 ${Math.max(1,Math.round(m*1.3/80))} мин`:`🚕 ~${Math.max(5,Math.round(m*1.4/400))} мин`;
@@ -793,7 +791,7 @@ async function nearLoad(k){const c=tc();c.near=c.near||{};if(c.near[k]&&Date.now
  const L=d.elements.map(x=>{const t=x.tags||{},lat=x.lat||(x.center&&x.center.lat),lng=x.lon||(x.center&&x.center.lon);const n=t['name:ru']||t['name:en']||t.name;if(!n||!lat)return null;return{n,a:t.amenity||t.shop||'',local:t.name,lat,lng,m:dist(h.lat,h.lng,lat,lng),hrs:t.opening_hours||'',tel:t.phone||t['contact:phone']||'',cu:t.cuisine||'',web:t.website||t['contact:website']||''}}).filter(Boolean).sort((a,b)=>a.m-b.m);
  const seen=new Set();const out=L.filter(x=>{const k2=x.n.toLowerCase();if(seen.has(k2))return false;seen.add(k2);return true}).slice(0,40);c.near[k]={t:Date.now(),d:out};saveTrips();return out}
 let nearK='food';
-function nearView(k){nearK=k||nearK;if(!NEAR[nearK])nearK='food';const h=HB();page('📍 Рядом с отелем',`<div class="chiprow">${Object.entries(NEAR).map(([kk,v])=>`<button data-nk="${kk}" class="${kk===nearK?'on':''}">${v[0]} ${v[1]}</button>`).join('')}</div>${h.approx?'<p class="foot">Отель не найден на карте — считаем от центра города. Поменять можно в «Кабинете».</p>':''}<div id="nearlist"><div class="spin"></div></div><p class="foot">Данные OpenStreetMap — часы работы уточняйте на месте.</p>`);
+function nearView(k){nearK=k||nearK;if(!NEAR[nearK])nearK='food';const h=HB();page('📍 Рядом с отелем',`<div class="chiprow">${Object.entries(NEAR).map(([kk,v])=>`<button data-nk="${kk}" class="${kk===nearK?'on':''}">${v[0]} ${v[1]}</button>`).join('')}</div><a class="act pri" style="width:100%;margin-bottom:10px" href="https://www.google.com/maps/search/${encodeURIComponent(gTerm(nearK))}/@${h.lat},${h.lng},15z" target="_blank">🗺️ ${NEAR[nearK][1]} — все в Google Картах</a>${h.approx?'<p class="foot">Отель не найден на карте — считаем от центра города. Поменять можно в «Кабинете».</p>':''}<div id="nearlist"><div class="spin"></div></div><p class="foot">Данные OpenStreetMap — часы работы уточняйте на месте.</p>`);
  nearLoad(nearK).then(L=>{const el=$('#nearlist');if(!el)return;el.innerHTML=L.length?L.map(x=>`<div class="li"><b>${esc(x.n)}</b><small>${dTxt(x.m)} · ${walkT(x.m)}${x.cu?' · '+esc(x.cu.replace(/_/g,' ').replace(/;/g,', ')):''}</small>${x.hrs?`<small>🕒 ${esc(x.hrs)}</small>`:''}${x.tel?x.tel.split(/[;,]/).slice(0,2).map(t=>`<small>📞 <a href="tel:${esc(t.replace(/[^\d+]/g,''))}">${esc(t.trim())}</a></small>`).join(''):''}${pbtns({...x,walk:x.m<2500,e:NEAR[nearK][0]})}</div>`).join(''):'<div class="empty">Рядом ничего не нашлось 🤷</div>'}).catch(()=>{const el=$('#nearlist');if(el)el.innerHTML='<div class="empty">Нужен интернет, чтобы найти места. Потом они сохранятся.</div>'})}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-nk]');if(b){nearK=b.dataset.nk;history.back();setTimeout(()=>nearView(),60)}});
 /* ---------- все разделы ---------- */
@@ -861,16 +859,15 @@ document.addEventListener('click',e=>{const d=e.target.closest('[data-day]');if(
  if(e.target.closest('[data-edit]')){newWiz(T);WS=5;renderWiz()}});
 function ckl(key,L){const ck=LS.get('ck_'+T.id+key,{});return `<div class="cklist">${L.map((t,i)=>`<label><input type="checkbox" data-ck="${key}|${i}" ${ck[i]?'checked':''}><span>${esc(t)}</span></label>`).join('')}</div>`}
 document.addEventListener('change',e=>{const c=e.target.closest('[data-ck]');if(!c)return;const[k,i]=c.dataset.ck.split('|');const o=LS.get('ck_'+T.id+k,{});o[i]=c.checked;LS.set('ck_'+T.id+k,o)});
-/* ---------- карта ---------- */
-let MAP=null,MLAY=null;
-function openMap(extra){TABOF='map';show('map');history.pushState({p:1},'');const h=HB();$('#mapcats').innerHTML=Object.entries(NEAR).map(([k,v])=>`<button data-mk="${k}">${v[0]} ${v[1]}</button>`).join('');
- if(!window.L){$('#map').innerHTML='<div class="empty">Карта загрузится с интернетом</div>';return}
- if(!MAP){MAP=L.map('map',{zoomControl:false}).setView([h.lat,h.lng],15);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(MAP);MLAY=L.layerGroup().addTo(MAP)}
- setTimeout(()=>MAP.invalidateSize(),60);MLAY.clearLayers();const ic=e=>L.divIcon({className:'',html:`<div class="pin">${e}</div>`,iconSize:[28,28],iconAnchor:[14,24]});
- L.marker([h.lat,h.lng],{icon:ic('🏨')}).bindPopup(`<b>${esc(T.hotel?T.hotel.name:T.dest.name)}</b>`).addTo(MLAY);
- if(extra&&extra.length){extra.forEach(x=>L.marker([x.lat,x.lng],{icon:ic(x.e||'📍')}).bindPopup(`<b>${esc(x.n)}</b><br><a href="${gdir(x.lat,x.lng)}" target="_blank">🧭 Маршрут</a>`).addTo(MLAY));MAP.setView([extra[0].lat,extra[0].lng],16)}else MAP.setView([h.lat,h.lng],15);
- if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>L.circleMarker([p.coords.latitude,p.coords.longitude],{radius:8,color:'#fff',fillColor:'#1c7ed6',fillOpacity:1,weight:3}).bindPopup('Вы здесь').addTo(MLAY),()=>{},{timeout:8000})}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-mk]');if(!b)return;const k=b.dataset.mk;document.querySelectorAll('[data-mk]').forEach(x=>x.classList.toggle('on',x===b));toast('Ищем '+NEAR[k][1].toLowerCase()+'…');nearLoad(k).then(Lst=>{if(!MAP)return;MLAY.clearLayers();const h=HB();const ic=e2=>L.divIcon({className:'',html:`<div class="pin">${e2}</div>`,iconSize:[28,28],iconAnchor:[14,24]});L.marker([h.lat,h.lng],{icon:ic('🏨')}).addTo(MLAY);Lst.forEach(x=>L.marker([x.lat,x.lng],{icon:ic(NEAR[k][0])}).bindPopup(`<b>${esc(x.n)}</b><br>${dTxt(x.m)}<br><a href="${gdir(x.lat,x.lng)}" target="_blank">🧭 Маршрут</a>`).addTo(MLAY));if(Lst.length)MAP.fitBounds(L.latLngBounds([[h.lat,h.lng],...Lst.slice(0,15).map(x=>[x.lat,x.lng])]),{padding:[30,30]})}).catch(()=>toast('Нужен интернет'))});
+/* ---------- карта (Google) ---------- */
+const GTERM={food:'restaurants',halal:'halal food',pharm:'pharmacy',med:'hospital',shop:'supermarket',money:'ATM',kids:'playground',beach:'beach',sight:'tourist attractions',spa:'spa massage',fuel:'gas station',police:'police',fire:'fire station',culture:'theatre',museum:'museum',night:'bar',mall:'shopping mall',worship:'',home:''};
+function gTerm(k){if(k==='worship')return({muslim:'mosque',christian:'church',jewish:'synagogue',buddhist:'buddhist temple',hindu:'hindu temple'})[T.rel]||'place of worship';if(k==='home')return ({KZ:'kazakh restaurant',RU:'russian restaurant',UZ:'uzbek restaurant',KG:'kyrgyz restaurant',AZ:'azerbaijani restaurant',TR:'turkish restaurant',GE:'georgian restaurant',AM:'armenian restaurant',IN:'indian restaurant',CN:'chinese restaurant'})[T.cit||T.home.cc]||'restaurant';return GTERM[k]||k}
+function openMap(k){TABOF='map';show('map');history.pushState({p:1},'');const h=HB();
+ $('#mapcats').innerHTML=`<button data-mk="" class="${!k?'on':''}">🏨 Отель</button>`+Object.entries(NEAR).map(([kk,v2])=>`<button data-mk="${kk}" class="${kk===k?'on':''}">${v2[0]} ${v2[1]}</button>`).join('');
+ const q=k?encodeURIComponent(gTerm(k)+' near '+h.lat+','+h.lng):encodeURIComponent(h.lat+','+h.lng);
+ $('#map').innerHTML=`<iframe src="https://maps.google.com/maps?q=${q}&z=${k?14:15}&hl=ru&output=embed" style="border:0;width:100%;height:100%" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+ $('#mapgo').innerHTML=`<a class="act pri" href="${k?`https://www.google.com/maps/search/${encodeURIComponent(gTerm(k))}/@${h.lat},${h.lng},15z`:gdir(h.lat,h.lng)}" target="_blank">${k?'🗺️ Открыть в Google Картах':'🧭 Дорога в отель'}</a><a class="act" href="https://www.google.com/maps/search/?api=1&query=${h.lat},${h.lng}" target="_blank">🏨 Отель в Google</a>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-mk]');if(!b)return;history.back();setTimeout(()=>openMap(b.dataset.mk||''),60)});
 /* ---------- дети ---------- */
 function openKids(){TABOF='kids';const kids=T.people.filter(p=>p.age!=='a');const Z=[['🎨','Раскраска','#ff8fb1',kColor],['🃏','Найди пару','#7fb8ff',()=>kMemory()],['🫧','Лопни пузыри','#7fd6e8',kBubbles],...GAMES];
  $('#s-kids').innerHTML=`<div class="ph"><h2>🧸 Для детей</h2></div><div class="pg"><p class="foot" style="margin-top:0">${kids.length?esc(kids.map(k=>k.e+' '+k.n).join(', '))+' — ':''}${Z.length} игр, работают без интернета.</p><div class="ktiles">${Z.map(([e,t,c],i)=>`<button class="ktile" data-kg="${i}" style="--c:${c}"><span>${e}</span><b>${t}</b></button>`).join('')}</div></div>`;show('kids');history.pushState({p:1},'');
