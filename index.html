@@ -758,7 +758,7 @@ async function loadAll(){T=curTrip();const c=tc();const d=T.dest,h=T.hotel||d;co
  cityWiki().catch(()=>{}),
  poolLoad().catch(()=>{}),nearLoad('food').catch(()=>{}),T.rel==='muslim'?nearLoad('halal').catch(()=>{}):0];
  if(daysUntil()>15){const y=+T.from.slice(0,4)-1;jobs.push(J(`https://archive-api.open-meteo.com/v1/archive?latitude=${d.lat}&longitude=${d.lng}&start_date=${y}${T.from.slice(4)}&end_date=${y}${T.to.slice(4)}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`).then(x=>c.arch=x).catch(()=>{}))}
- await Promise.allSettled(jobs);saveTrips()}
+ await Promise.allSettled(jobs);saveTrips();if(SCR==='home'&&T&&T.id===curTrip().id)renderHome()}
 const CITNAME=cc=>(CITS.find(c=>c[0]===cc)||[0,cc])[1];
 const HOMECUR={KZ:'KZT',RU:'RUB',UZ:'UZS',KG:'KGS',AZ:'AZN',BY:'BYN',UA:'UAH',TR:'TRY',US:'USD',AE:'AED',TH:'THB',GE:'GEL',AM:'AMD',TJ:'TJS',TM:'TMT',MN:'MNT',CN:'CNY',DE:'EUR',FR:'EUR',IT:'EUR',ES:'EUR',GB:'GBP'};
 const homeCur=()=>HOMECUR[T.home.cc]||'USD';
@@ -1119,10 +1119,11 @@ VIEWS.print=function(){const P=tc().pool?buildPlan():[];const h=T.hotel||{};cons
  <h2>🗣️ Фразы</h2><table>${(PK()?PK().ph:GEN_PH).map(x=>`<tr><td>${esc(x[0])}</td><td class="big">${esc(x[1])}</td><td>${esc(x[2])}</td></tr>`).join('')}</table><p style="color:#888">Создано в Voyalo</p></body></html>`);w.document.close()};
 
 /* ===================== Город: фото, факты ===================== */
-async function cityWiki(){const c=tc();if(c.city&&c.city.v===2)return;const nm=T.dest.name,cn=cName(T.dest.cc);const S=async(l,t)=>J(`https://${l}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t)}`).catch(()=>null);
+async function cityWiki(){const c=tc();if(c.city&&c.city.v===3)return;const nm=T.dest.name,cn=cName(T.dest.cc);const S=async(l,t)=>J(`https://${l}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t)}`).catch(()=>null);
  let w=await S('ru',nm);if(!w||w.type==='disambiguation'||!w.extract)w=await S('ru',nm+' (город)');if(!w||!w.extract)w=await S('en',nm);
- const k=await S('ru',cn);const img=w&&(w.originalimage||w.thumbnail);
- c.city={v:2,img:img?(img.source.replace(/\/\d+px-/,'/1200px-')):null,imgS:w&&w.thumbnail?w.thumbnail.source:null,x:w?w.extract:'',cx:k?k.extract:''};saveTrips()}
+ const k=await S('ru',cn);const COL=/collage|montage|коллаж|mosaic|composite|panorama_of_/i;let img=w&&(w.originalimage||w.thumbnail);
+ if(!img||COL.test(img.source)){const e=await S('en',nm);const ei=e&&(e.originalimage||e.thumbnail);if(ei&&!COL.test(ei.source))img=ei;else{try{const P=await poolLoad();const b=P.filter(x2=>x2.img).sort((a2,b2)=>b2.s-a2.s)[0];if(b)img={source:b.img.replace(/\/\d+px-/,'/1200px-')}}catch(er){}}}
+ c.city={v:3,img:img?(img.source.replace(/\/\d+px-/,'/1200px-')):null,imgS:w&&w.thumbnail?w.thumbnail.source:null,x:w?w.extract:'',cx:k?k.extract:''};saveTrips()}
 function factsAll(){const c=tc(),p=PK();const sp=t=>(t||'').replace(/\([^)]*\)/g,'').split(/(?<=[.!?])\s+/).map(s=>s.trim()).filter(s=>s.length>45&&s.length<230);
  const city=sp(c.city&&c.city.x).map(s=>'🏙️ '+s),ctry=sp(c.city&&c.city.cx).map(s=>'🌍 '+s),pk=(p?p.facts:[]).map(s=>'💡 '+s);const out=[];const mx=Math.max(city.length,ctry.length,pk.length);for(let i=0;i<mx;i++){if(city[i])out.push(city[i]);if(pk[i])out.push(pk[i]);if(ctry[i])out.push(ctry[i])}return out}
 let factOff=0;
