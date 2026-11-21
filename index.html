@@ -205,8 +205,8 @@ body{background:radial-gradient(90% 40% at 100% 0%,color-mix(in srgb,var(--c2) 1
 @keyframes fl1{to{transform:translate(18%,14%) scale(1.15)}}@keyframes fl2{to{transform:translate(-16%,-12%) scale(1.1)}}
 @media (prefers-reduced-motion:reduce){.amb2 i{animation:none}}
 html.eco .amb{display:none}html.eco .amb2 i{animation:none}
-.scr{z-index:1}
-.app{background:var(--bg)}
+.app{background:var(--bg);isolation:isolate}
+.amb,.amb2{z-index:-1!important}
 .card,.li{background:rgba(255,255,255,.82)!important;border:1px solid rgba(201,162,39,.22)!important;box-shadow:0 10px 30px rgba(110,70,20,.08),inset 0 1px 0 rgba(255,255,255,.9)!important}
 .card.today{background:linear-gradient(135deg,rgba(255,247,230,.92),rgba(255,236,246,.92))!important}
 .li.alert{background:rgba(255,245,245,.92)!important;border-left:5px solid #e03131!important}
@@ -1390,7 +1390,7 @@ async function heroLoad(){const c=tc();if(c.hero&&c.hero.v===2||c.heroL||ECO()||
  c.hero={v:2,L:R.sort((a,b)=>b.s-a.s).slice(0,10).map(x=>x.u)};saveTrips()}catch(e){}c.heroL=0}
 function heroImgs(){const c=tc();const k=heroKey();if(k)return HEROC[k];const big=u=>u?u.replace(/\/\d+px-/,'/960px-'):u;const H=(c.hero&&c.hero.L)||[];
  const A=H.length>=5?[...H,c.city&&c.city.img]:[c.city&&c.city.img,...H,...((c.pool&&c.pool.d)||[]).filter(x=>x.img).sort((a,b)=>b.s-a.s).slice(0,9).map(x=>big(x.img)),...(c.sights||[]).filter(x=>x.img).slice(0,4).map(x=>big(x.img))];
- return [...new Set(A.filter(u=>u&&!COL.test(decodeURIComponent(u))))].slice(0,10)}
+ const dec=u=>{try{return decodeURIComponent(u)}catch(e){return u}};return [...new Set(A.filter(u=>u&&!COL.test(dec(u))))].slice(0,10)}
 function heroErr(el){const L=heroImgs();const n=+(el.dataset.n||0)+1;if(n>=Math.min(4,L.length)){el.remove();return}el.dataset.n=n;setTimeout(()=>{el.src=L[n];ambSet(L[n])},n*800)}
 function ambSet(u){document.documentElement.classList.toggle('eco',ECO());document.documentElement.style.setProperty('--bgimg',u&&!ECO()?`url("${u}")`:'none')}
 let SLI=0;
@@ -1399,9 +1399,21 @@ setInterval(slideTick,60000);
 
 /* ---------- старт ---------- */
 document.addEventListener('click',e=>{if(e.target.closest('[data-sossend]')){if(!me())return pickMe(()=>VIEWS.sos());const go=(p)=>send({k:'sos',lat:p?+p.coords.latitude.toFixed(5):null,lng:p?+p.coords.longitude.toFixed(5):null}).then(()=>toast('🆘 SOS отправлен семье'));navigator.geolocation?navigator.geolocation.getCurrentPosition(go,()=>go(null),{timeout:10000}):go(null)}});
+/* ---------- защита от белого экрана ---------- */
+let BOOTERR='';
+function visibleScr(){return [...document.querySelectorAll('.scr')].some(s=>getComputedStyle(s).display!=='none'&&s.innerHTML.length>50)}
+function rescue(msg){if(document.getElementById('rescue'))return;const d=document.createElement('div');d.id='rescue';d.style.cssText='position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:rgba(255,250,244,.96);font:16px -apple-system,sans-serif;color:#14213d;text-align:center';
+ d.innerHTML=`<div style="max-width:360px"><div style="font-size:52px">🧭</div><h2 style="margin:8px 0">Что-то пошло не так</h2><p style="color:#6b7486">Нажмите «Обновить». Если не поможет — «Сбросить кэш» (ваши поездки сохранятся).</p><button id="rsc1" style="width:100%;padding:14px;border:0;border-radius:16px;background:#7048e8;color:#fff;font-weight:800;font-size:16px;margin:6px 0">🔄 Обновить</button><button id="rsc2" style="width:100%;padding:14px;border:0;border-radius:16px;background:#eee;font-weight:800;font-size:16px;margin:6px 0">🧹 Сбросить кэш</button><button id="rsc3" style="width:100%;padding:12px;border:0;border-radius:16px;background:none;color:#7048e8;font-weight:700">📋 Открыть «Мои поездки»</button><small style="display:block;margin-top:12px;color:#aaa;word-break:break-word">${esc(String(msg||'').slice(0,160))}</small></div>`;
+ document.body.appendChild(d);
+ d.querySelector('#rsc1').onclick=()=>location.reload();
+ d.querySelector('#rsc2').onclick=async()=>{try{for(const k of await caches.keys())await caches.delete(k);const r=await navigator.serviceWorker.getRegistrations();for(const x of r)await x.unregister()}catch(e){}location.reload()};
+ d.querySelector('#rsc3').onclick=()=>{d.remove();try{renderLand();show('land')}catch(e){rescue(e)}}}
+window.addEventListener('error',e=>{BOOTERR=(e.message||'')+' @'+(e.lineno||'');if(!visibleScr())setTimeout(()=>{if(!visibleScr())rescue(BOOTERR)},300)});
+window.addEventListener('unhandledrejection',e=>{BOOTERR=String(e.reason&&e.reason.message||e.reason)});
+setTimeout(()=>{if(!visibleScr()){try{if(curTrip())openGuide();else{renderLand();show('land')}}catch(e){BOOTERR=e.message}setTimeout(()=>{if(!visibleScr())rescue(BOOTERR||'Экран не открылся')},800)}},3500);
 (function init(){gte();const m=location.hash.match(/#trip=([\w-]+)/);if(m){try{const t=b64d(m[1]);const i=TRIPS.findIndex(x=>x.id===t.id);if(i>=0)TRIPS[i]={...t,cache:TRIPS[i].cache};else TRIPS.push(t);CUR=t.id;saveTrips();history.replaceState(null,'',location.pathname);toast('Путеводитель добавлен в «Мои поездки»')}catch(e){}}
  if(!LS.get('lang',null)&&!m){renderLang(true);return}
- if(curTrip())openGuide();else{renderLand();show('land')}
- if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})})();
+ if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+ try{if(curTrip())openGuide();else{renderLand();show('land')}}catch(e){BOOTERR=e.message;console.error(e);try{renderLand();show('land')}catch(e2){rescue(e.message)}}})();
 
 </script></body></html>
