@@ -1390,7 +1390,7 @@ async function heroLoad(){const c=tc();if(c.hero&&c.hero.v===2||c.heroL||ECO()||
  c.hero={v:2,L:R.sort((a,b)=>b.s-a.s).slice(0,10).map(x=>x.u)};saveTrips()}catch(e){}c.heroL=0}
 function heroImgs(){const c=tc();const k=heroKey();if(k)return HEROC[k];const big=u=>u?u.replace(/\/\d+px-/,'/960px-'):u;const H=(c.hero&&c.hero.L)||[];
  const A=H.length>=5?[...H,c.city&&c.city.img]:[c.city&&c.city.img,...H,...((c.pool&&c.pool.d)||[]).filter(x=>x.img).sort((a,b)=>b.s-a.s).slice(0,9).map(x=>big(x.img)),...(c.sights||[]).filter(x=>x.img).slice(0,4).map(x=>big(x.img))];
- const dec=u=>{try{return decodeURIComponent(u)}catch(e){return u}};return [...new Set(A.filter(u=>u&&!COL.test(dec(u))))].slice(0,10)}
+ const CL=/collage|montage|коллаж|mosaic|composite|panorama_of_/i;const dec=u=>{try{return decodeURIComponent(u)}catch(e){return u}};return [...new Set(A.filter(u=>u&&!CL.test(dec(u))))].slice(0,10)}
 function heroErr(el){const L=heroImgs();const n=+(el.dataset.n||0)+1;if(n>=Math.min(4,L.length)){el.remove();return}el.dataset.n=n;setTimeout(()=>{el.src=L[n];ambSet(L[n])},n*800)}
 function ambSet(u){document.documentElement.classList.toggle('eco',ECO());document.documentElement.style.setProperty('--bgimg',u&&!ECO()?`url("${u}")`:'none')}
 let SLI=0;
